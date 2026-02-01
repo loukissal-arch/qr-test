@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Screen – Locked</title>
+
+<style>
+body {
+  margin: 0;
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui;
+}
+
+/* FIXED PHONE CANVAS */
+#canvas {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  background: black;
+  overflow: hidden;
+}
+
+/* BACKGROUND IMAGE */
+#bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 0;
+}
+
+/* TIME + DATE WINDOW */
+#datetime {
+  position: absolute;
+  top: 227px;
+  left: 96px;
+  width: 183px;
+  height: 125px;
+  background: white;
+  color: black;
+  border-radius: 12px;
+  text-align: center;
+  padding-top: 12px;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+#time {
+  font-size: 48px;
+  font-weight: 600;
+}
+
+#date {
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* INVISIBLE CLICK AREAS */
+.hotspot {
+  position: absolute;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* ENTRY */
+#entry {
+  top: 356px;
+  left: 43px;
+  width: 305px;
+  height: 115px;
+}
+
+/* EXIT */
+#exit {
+  top: 487px;
+  left: 43px;
+  width: 306px;
+  height: 118px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="canvas">
+
+  <img id="bg" src="bg.jpg">
+
+  <!-- TIME / DATE -->
+  <div id="datetime">
+    <div id="time"></div>
+    <div id="date"></div>
+  </div>
+
+  <!-- ENTRY / EXIT (INVISIBLE) -->
+  <div id="entry" class="hotspot" onclick="alert('ENTRY CLICKED')"></div>
+  <div id="exit" class="hotspot" onclick="alert('EXIT CLICKED')"></div>
+
+</div>
+
+<script>
+/* SET TIME & DATE – 24H + MM/DD/YY */
+const now = new Date();
+
+document.getElementById("time").textContent =
+  now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+document.getElementById("date").textContent =
+  now.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: '2-digit'
+  });
+</script>
+
+</body>
+</html>
