@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Camera Test</title>
+<title>Camera Overlay Fix</title>
 
 <style>
-body {
+html, body {
   margin: 0;
-  background: #111;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: black;
   font-family: -apple-system, BlinkMacSystemFont, system-ui;
 }
 
@@ -21,43 +20,40 @@ body {
   position: relative;
   width: 393px;
   height: 852px;
+  margin: auto;
   background: black;
   overflow: hidden;
 }
 
-/* CAMERA SCREEN */
-#scanner {
-  position: absolute;
-  inset: 0;
-  display: none;
-}
-
-/* LIVE VIDEO */
+/* CAMERA VIDEO — MUST BE ON TOP */
 #video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 10; /* 🔑 ABOVE GRAPHICS */
 }
 
-/* CAMERA WINDOW MASK */
+/* DARK MASK AROUND WINDOW */
 #cameraHole {
   position: absolute;
   top: 190px;
   left: 36px;
   width: 321px;
   height: 321px;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
+  z-index: 20;
   pointer-events: none;
 }
 
-/* CAMERA UI IMAGE */
+/* FRAME GRAPHICS (NO SOLID CENTER) */
 #cameraUI {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  z-index: 30;
   pointer-events: none;
 }
 </style>
@@ -67,27 +63,31 @@ body {
 
 <div id="canvas">
 
-  <div id="scanner">
-    <video id="video" autoplay playsinline></video>
-    <div id="cameraHole"></div>
-    <img src="camera-ui.jpg" id="cameraUI">
-  </div>
+  <!-- CAMERA VIDEO -->
+  <video id="video" muted autoplay playsinline></video>
+
+  <!-- MASK -->
+  <div id="cameraHole"></div>
+
+  <!-- FRAME UI -->
+  <img src="camera-ui.jpg" id="cameraUI">
 
 </div>
 
 <script>
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user" }, // 🤳 selfie camera
+    video: { facingMode: "user" },
     audio: false
   });
 
-  document.getElementById("video").srcObject = stream;
-  document.getElementById("scanner").style.display = "block";
+  const video = document.getElementById("video");
+  video.srcObject = stream;
+  await video.play();
 }
 
-// TEMP: tap anywhere to start camera
-document.body.onclick = startCamera;
+// start on tap (iOS requirement)
+document.body.addEventListener("click", startCamera, { once: true });
 </script>
 
 </body>
