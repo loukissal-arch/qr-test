@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QR Scanner</title>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
+<title>Camera Test</title>
 
 <style>
 body {
@@ -23,17 +21,8 @@ body {
   position: relative;
   width: 393px;
   height: 852px;
-  background: #3B82F6;
+  background: black;
   overflow: hidden;
-}
-
-/* FIRST MENU IMAGE */
-#bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 /* CAMERA SCREEN */
@@ -41,29 +30,18 @@ body {
   position: absolute;
   inset: 0;
   display: none;
-  z-index: 10;
-  background: black;
 }
 
-/* CAMERA FEED */
-#reader {
+/* LIVE VIDEO */
+#video {
   position: absolute;
   inset: 0;
-}
-
-#reader video {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* REMOVE DEFAULT QR UI */
-.qr-shaded-region,
-#reader canvas {
-  display: none !important;
-}
-
-/* CAMERA WINDOW MASK — THIS IS THE KEY */
+/* CAMERA WINDOW MASK */
 #cameraHole {
   position: absolute;
   top: 190px;
@@ -71,8 +49,6 @@ body {
   width: 321px;
   height: 321px;
   box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);
-  border-radius: 0;
-  z-index: 15;
   pointer-events: none;
 }
 
@@ -82,7 +58,6 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 20;
   pointer-events: none;
 }
 </style>
@@ -92,50 +67,27 @@ body {
 
 <div id="canvas">
 
-  <!-- FIRST MENU -->
-  <img id="bg" src="bg.jpg">
-
-  <!-- CAMERA MENU -->
   <div id="scanner">
-    <div id="reader"></div>
-
-    <!-- REAL HOLE -->
+    <video id="video" autoplay playsinline></video>
     <div id="cameraHole"></div>
-
-    <!-- UI OVERLAY -->
     <img src="camera-ui.jpg" id="cameraUI">
   </div>
 
 </div>
 
 <script>
-let qr;
+async function startCamera() {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "user" }, // 🤳 selfie camera
+    audio: false
+  });
 
-function startScan() {
+  document.getElementById("video").srcObject = stream;
   document.getElementById("scanner").style.display = "block";
-
-  qr = new Html5Qrcode("reader");
-  qr.start(
-    { facingMode: "user" }, // selfie camera
-    { fps: 10 },
-    () => {
-      stopScan();
-      alert("SUCCESS");
-    }
-  );
 }
 
-function stopScan() {
-  if (qr) {
-    qr.stop().then(() => {
-      qr.clear();
-      document.getElementById("scanner").style.display = "none";
-    });
-  }
-}
-
-/* TEMP: tap anywhere to test */
-document.body.onclick = startScan;
+// TEMP: tap anywhere to start camera
+document.body.onclick = startCamera;
 </script>
 
 </body>
