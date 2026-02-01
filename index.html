@@ -23,11 +23,11 @@ body {
   position: relative;
   width: 390px;
   height: 844px;
-  background: #3B82F6; /* lighter blue */
+  background: #3B82F6;
   overflow: hidden;
 }
 
-/* MAIN BACKGROUND IMAGE */
+/* MAIN BACKGROUND */
 #bg {
   position: absolute;
   inset: 0;
@@ -49,7 +49,6 @@ body {
   border-radius: 12px;
   text-align: center;
   padding-top: 12px;
-  box-sizing: border-box;
   z-index: 2;
 }
 
@@ -60,18 +59,15 @@ body {
 
 #date {
   font-size: 16px;
-  font-weight: 500;
   margin-top: 4px;
 }
 
-/* INVISIBLE BUTTON AREAS */
+/* HOTSPOTS */
 .hotspot {
   position: absolute;
   z-index: 3;
-  cursor: pointer;
 }
 
-/* ENTRY */
 #entry {
   top: 356px;
   left: 43px;
@@ -79,7 +75,6 @@ body {
   height: 115px;
 }
 
-/* EXIT */
 #exit {
   top: 487px;
   left: 43px;
@@ -87,23 +82,37 @@ body {
   height: 118px;
 }
 
-/* CAMERA OVERLAY */
+/* CAMERA SCREEN */
 #scanner {
   position: absolute;
   inset: 0;
-  z-index: 10;
   display: none;
+  z-index: 10;
   background: black;
 }
 
-/* LIVE CAMERA */
+/* CAMERA VIDEO */
 #reader {
   position: absolute;
   inset: 0;
   z-index: 1;
 }
 
-/* PNG FRAME ON TOP */
+/* FORCE VIDEO VISIBILITY */
+#reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* REMOVE html5-qrcode UI */
+#reader canvas,
+#reader img,
+#reader .qr-shaded-region {
+  display: none !important;
+}
+
+/* OVERLAY FRAME */
 #cameraOverlay {
   position: absolute;
   inset: 0;
@@ -139,27 +148,29 @@ body {
 </div>
 
 <script>
-/* TIME + DATE */
+/* TIME / DATE */
 const now = new Date();
-time.textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+time.textContent = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
 date.textContent = now.toLocaleDateString('en-US', {
-  month: '2-digit',
-  day: '2-digit',
-  year: '2-digit'
+  month:'2-digit',
+  day:'2-digit',
+  year:'2-digit'
 });
 
 let qr;
-let currentMode = null;
 
 /* OPEN CAMERA */
-function startScan(mode) {
-  currentMode = mode;
+function startScan() {
   document.getElementById("scanner").style.display = "block";
 
   qr = new Html5Qrcode("reader");
   qr.start(
-    { facingMode: "user" }, // 🤳 selfie camera
-    { fps: 10, qrbox: 250 },
+    { facingMode: "user" },   // 🤳 SELFIE CAMERA
+    {
+      fps: 10,
+      qrbox: undefined,       // ❌ disable default UI
+      disableFlip: true
+    },
     onScanSuccess
   );
 }
@@ -174,16 +185,16 @@ function stopScan() {
   }
 }
 
-/* SCAN SUCCESS */
+/* SUCCESS */
 function onScanSuccess(text) {
+  console.log("QR:", text);
   stopScan();
-  console.log("QR:", text, "MODE:", currentMode);
-  alert(currentMode === "entry" ? "ENTRY SUCCESS" : "EXIT SUCCESS");
+  alert("SUCCESS");
 }
 
 /* BUTTONS */
-document.getElementById("entry").onclick = () => startScan("entry");
-document.getElementById("exit").onclick  = () => startScan("exit");
+document.getElementById("entry").onclick = startScan;
+document.getElementById("exit").onclick  = startScan;
 </script>
 
 </body>
