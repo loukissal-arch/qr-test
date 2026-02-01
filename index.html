@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Entry Exit Camera</title>
+<title>Two Menu Camera App</title>
 
 <style>
+/* ---------- GLOBAL ---------- */
 html, body {
   margin: 0;
   padding: 0;
-  background: black;
   height: 100%;
+  background: black;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, system-ui;
 }
 
-/* iPhone 16 Pro canvas */
+/* iPhone 16 Pro logical size */
 #app {
   position: relative;
   width: 393px;
@@ -23,7 +25,10 @@ html, body {
   background: black;
 }
 
-/* ---------- START MENU ---------- */
+/* ======================================================
+   FIRST MENU (ENTRY / EXIT)
+   ====================================================== */
+
 #menu {
   position: absolute;
   inset: 0;
@@ -34,10 +39,9 @@ html, body {
 /* Invisible clickable areas */
 .btn {
   position: absolute;
-  cursor: pointer;
 }
 
-/* ENTRY button */
+/* Entry button */
 #entryBtn {
   top: 356px;
   left: 43px;
@@ -45,7 +49,7 @@ html, body {
   height: 115px;
 }
 
-/* EXIT button */
+/* Exit button */
 #exitBtn {
   top: 487px;
   left: 43px;
@@ -53,15 +57,18 @@ html, body {
   height: 118px;
 }
 
-/* ---------- CAMERA SCREEN ---------- */
+/* ======================================================
+   SECOND MENU (CAMERA SCREEN)
+   ====================================================== */
+
 #cameraScreen {
   position: absolute;
   inset: 0;
-  display: none;
-  z-index: 5;
+  display: none;   /* HIDDEN AT START */
+  z-index: 2;
 }
 
-/* Solid camera UI JPEG (BACKGROUND ONLY) */
+/* Camera UI background (SOLID JPEG) */
 #cameraUI {
   position: absolute;
   inset: 0;
@@ -69,15 +76,15 @@ html, body {
   z-index: 1;
 }
 
-/* CAMERA VIDEO — ON TOP */
+/* Camera video ON TOP of graphic */
 #video {
   position: absolute;
-  top: 190px;     /* adjust if needed */
-  left: 36px;     /* adjust if needed */
-  width: 321px;   /* adjust if needed */
-  height: 321px;  /* adjust if needed */
+  top: 190px;
+  left: 36px;
+  width: 321px;
+  height: 321px;
   object-fit: cover;
-  z-index: 10;
+  z-index: 5;
   background: black;
 }
 </style>
@@ -87,13 +94,13 @@ html, body {
 
 <div id="app">
 
-  <!-- START MENU -->
+  <!-- ===== FIRST MENU ===== -->
   <div id="menu">
     <div id="entryBtn" class="btn"></div>
     <div id="exitBtn" class="btn"></div>
   </div>
 
-  <!-- CAMERA SCREEN -->
+  <!-- ===== SECOND MENU (CAMERA) ===== -->
   <div id="cameraScreen">
     <div id="cameraUI"></div>
     <video id="video" muted autoplay playsinline></video>
@@ -104,15 +111,19 @@ html, body {
 <script>
 let stream = null;
 
-/* START CAMERA */
+/* OPEN CAMERA AND SWITCH MENUS */
 async function openCamera(mode) {
-  console.log("MODE:", mode);
+  console.log("Clicked:", mode);
 
+  // hide first menu
   document.getElementById("menu").style.display = "none";
+
+  // show camera menu
   document.getElementById("cameraScreen").style.display = "block";
 
+  // start camera
   stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user" }, // selfie camera
+    video: { facingMode: "user" },
     audio: false
   });
 
@@ -121,7 +132,7 @@ async function openCamera(mode) {
   await video.play();
 }
 
-/* BUTTON HANDLERS */
+/* BUTTON EVENTS */
 document.getElementById("entryBtn").onclick = () => openCamera("entry");
 document.getElementById("exitBtn").onclick  = () => openCamera("exit");
 </script>
