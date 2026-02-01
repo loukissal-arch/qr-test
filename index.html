@@ -27,7 +27,7 @@ body {
   overflow: hidden;
 }
 
-/* MAIN MENU IMAGE */
+/* FIRST MENU IMAGE */
 #bg {
   position: absolute;
   inset: 0;
@@ -63,31 +63,17 @@ body {
   display: none !important;
 }
 
-/* CAMERA MASK (WINDOW) */
-#cameraMask {
-  position: absolute;
-  inset: 0;
-  z-index: 15;
-  pointer-events: none;
-}
-
-/* Darken everything except window */
-#cameraMask::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-}
-
-/* Clear camera window (slightly larger than black square) */
-#cameraMask::after {
-  content: "";
+/* CAMERA WINDOW MASK — THIS IS THE KEY */
+#cameraHole {
   position: absolute;
   top: 190px;
   left: 36px;
   width: 321px;
   height: 321px;
-  background: transparent;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);
+  border-radius: 0;
+  z-index: 15;
+  pointer-events: none;
 }
 
 /* CAMERA UI IMAGE */
@@ -112,7 +98,11 @@ body {
   <!-- CAMERA MENU -->
   <div id="scanner">
     <div id="reader"></div>
-    <div id="cameraMask"></div>
+
+    <!-- REAL HOLE -->
+    <div id="cameraHole"></div>
+
+    <!-- UI OVERLAY -->
     <img src="camera-ui.jpg" id="cameraUI">
   </div>
 
@@ -121,7 +111,6 @@ body {
 <script>
 let qr;
 
-/* START CAMERA */
 function startScan() {
   document.getElementById("scanner").style.display = "block";
 
@@ -136,7 +125,6 @@ function startScan() {
   );
 }
 
-/* STOP CAMERA */
 function stopScan() {
   if (qr) {
     qr.stop().then(() => {
@@ -146,7 +134,7 @@ function stopScan() {
   }
 }
 
-/* TEMP: tap anywhere to test camera */
+/* TEMP: tap anywhere to test */
 document.body.onclick = startScan;
 </script>
 
