@@ -27,59 +27,13 @@ body {
   overflow: hidden;
 }
 
-/* MAIN BACKGROUND */
+/* MAIN IMAGE */
 #bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  z-index: 0;
-}
-
-/* TIME / DATE */
-#datetime {
-  position: absolute;
-  top: 227px;
-  left: 96px;
-  width: 183px;
-  height: 125px;
-  background: white;
-  color: black;
-  border-radius: 12px;
-  text-align: center;
-  padding-top: 12px;
-  z-index: 2;
-}
-
-#time {
-  font-size: 48px;
-  font-weight: 600;
-}
-
-#date {
-  font-size: 16px;
-  margin-top: 4px;
-}
-
-/* HOTSPOTS */
-.hotspot {
-  position: absolute;
-  z-index: 3;
-}
-
-#entry {
-  top: 356px;
-  left: 43px;
-  width: 305px;
-  height: 115px;
-}
-
-#exit {
-  top: 487px;
-  left: 43px;
-  width: 306px;
-  height: 118px;
 }
 
 /* CAMERA SCREEN */
@@ -95,31 +49,51 @@ body {
 #reader {
   position: absolute;
   inset: 0;
-  z-index: 1;
 }
 
-/* FORCE VIDEO VISIBILITY */
 #reader video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* REMOVE html5-qrcode UI */
-#reader canvas,
-#reader img,
-#reader .qr-shaded-region {
+/* HIDE QR UI */
+.qr-shaded-region,
+#reader canvas {
   display: none !important;
 }
 
-/* OVERLAY FRAME */
-#cameraOverlay {
+/* GRAPHIC OVERLAY IMAGE */
+#cameraFrame {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 20;
   pointer-events: none;
+}
+
+/* MASK — THIS IS THE CAMERA WINDOW */
+#cameraMask {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  background: rgba(0,0,0,0);
+  box-shadow:
+    0 0 0 9999px rgba(0,0,0,0.85);
+}
+
+/* CAMERA WINDOW POSITION (ADJUST IF NEEDED) */
+#cameraMask::after {
+  content: "";
+  position: absolute;
+  top: 230px;
+  left: 45px;
+  width: 300px;
+  height: 300px;
+  background: transparent;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0);
 }
 </style>
 </head>
@@ -128,54 +102,38 @@ body {
 
 <div id="canvas">
 
-  <!-- MAIN SCREEN -->
   <img id="bg" src="bg.jpg">
 
-  <div id="datetime">
-    <div id="time"></div>
-    <div id="date"></div>
-  </div>
-
-  <div id="entry" class="hotspot"></div>
-  <div id="exit" class="hotspot"></div>
-
-  <!-- CAMERA SCREEN -->
+  <!-- CAMERA -->
   <div id="scanner">
     <div id="reader"></div>
-    <img src="camera-overlay.png" id="cameraOverlay">
+
+    <!-- MASK CREATES CAMERA WINDOW -->
+    <div id="cameraMask"></div>
+
+    <!-- YOUR GRAPHIC FRAME (NO CUTOUT NEEDED) -->
+    <img src="camera-frame.jpg" id="cameraFrame">
   </div>
 
 </div>
 
 <script>
-/* TIME / DATE */
-const now = new Date();
-time.textContent = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-date.textContent = now.toLocaleDateString('en-US', {
-  month:'2-digit',
-  day:'2-digit',
-  year:'2-digit'
-});
-
 let qr;
 
-/* OPEN CAMERA */
 function startScan() {
   document.getElementById("scanner").style.display = "block";
 
   qr = new Html5Qrcode("reader");
   qr.start(
-    { facingMode: "user" },   // 🤳 SELFIE CAMERA
-    {
-      fps: 10,
-      qrbox: undefined,       // ❌ disable default UI
-      disableFlip: true
-    },
-    onScanSuccess
+    { facingMode: "user" },
+    { fps: 10 },
+    () => {
+      stopScan();
+      alert("SUCCESS");
+    }
   );
 }
 
-/* CLOSE CAMERA */
 function stopScan() {
   if (qr) {
     qr.stop().then(() => {
@@ -185,16 +143,7 @@ function stopScan() {
   }
 }
 
-/* SUCCESS */
-function onScanSuccess(text) {
-  console.log("QR:", text);
-  stopScan();
-  alert("SUCCESS");
-}
-
-/* BUTTONS */
-document.getElementById("entry").onclick = startScan;
-document.getElementById("exit").onclick  = startScan;
+document.body.onclick = startScan;
 </script>
 
 </body>
