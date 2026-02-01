@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QR Screen – Camera</title>
+<title>QR Scanner</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -18,16 +18,16 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, system-ui;
 }
 
-/* FIXED PHONE CANVAS */
+/* PHONE CANVAS */
 #canvas {
   position: relative;
   width: 390px;
   height: 844px;
-  background: #3B82F6; /* 🔵 LIGHTER BLUE */
+  background: #3B82F6; /* lighter blue */
   overflow: hidden;
 }
 
-/* BACKGROUND IMAGE */
+/* MAIN BACKGROUND IMAGE */
 #bg {
   position: absolute;
   inset: 0;
@@ -37,7 +37,7 @@ body {
   z-index: 0;
 }
 
-/* TIME + DATE */
+/* TIME / DATE */
 #datetime {
   position: absolute;
   top: 227px;
@@ -64,11 +64,11 @@ body {
   margin-top: 4px;
 }
 
-/* INVISIBLE CLICK AREAS */
+/* INVISIBLE BUTTON AREAS */
 .hotspot {
   position: absolute;
-  cursor: pointer;
   z-index: 3;
+  cursor: pointer;
 }
 
 /* ENTRY */
@@ -91,15 +91,26 @@ body {
 #scanner {
   position: absolute;
   inset: 0;
-  background: black;
-  display: none;
   z-index: 10;
-  justify-content: center;
-  align-items: center;
+  display: none;
+  background: black;
 }
 
+/* LIVE CAMERA */
 #reader {
-  width: 300px;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* PNG FRAME ON TOP */
+#cameraOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
 }
 </style>
 </head>
@@ -108,48 +119,52 @@ body {
 
 <div id="canvas">
 
+  <!-- MAIN SCREEN -->
   <img id="bg" src="bg.jpg">
 
-  <!-- TIME / DATE -->
   <div id="datetime">
     <div id="time"></div>
     <div id="date"></div>
   </div>
 
-  <!-- ENTRY / EXIT -->
   <div id="entry" class="hotspot"></div>
   <div id="exit" class="hotspot"></div>
 
-  <!-- CAMERA -->
+  <!-- CAMERA SCREEN -->
   <div id="scanner">
     <div id="reader"></div>
+    <img src="camera-overlay.png" id="cameraOverlay">
   </div>
 
 </div>
 
 <script>
-/* SET TIME & DATE */
+/* TIME + DATE */
 const now = new Date();
-time.textContent = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-date.textContent = now.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'2-digit' });
+time.textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+date.textContent = now.toLocaleDateString('en-US', {
+  month: '2-digit',
+  day: '2-digit',
+  year: '2-digit'
+});
 
-let currentMode = null;
 let qr;
+let currentMode = null;
 
-/* START CAMERA — SELFIE (FRONT) CAMERA */
+/* OPEN CAMERA */
 function startScan(mode) {
   currentMode = mode;
-  document.getElementById("scanner").style.display = "flex";
+  document.getElementById("scanner").style.display = "block";
 
   qr = new Html5Qrcode("reader");
   qr.start(
-    { facingMode: "user" },   // 🤳 FRONT / SELFIE CAMERA
+    { facingMode: "user" }, // 🤳 selfie camera
     { fps: 10, qrbox: 250 },
     onScanSuccess
   );
 }
 
-/* STOP CAMERA */
+/* CLOSE CAMERA */
 function stopScan() {
   if (qr) {
     qr.stop().then(() => {
@@ -159,15 +174,14 @@ function stopScan() {
   }
 }
 
-/* QR SUCCESS */
+/* SCAN SUCCESS */
 function onScanSuccess(text) {
   stopScan();
-  console.log("QR DATA:", text);
-  console.log("MODE:", currentMode);
+  console.log("QR:", text, "MODE:", currentMode);
   alert(currentMode === "entry" ? "ENTRY SUCCESS" : "EXIT SUCCESS");
 }
 
-/* CLICK HANDLERS */
+/* BUTTONS */
 document.getElementById("entry").onclick = () => startScan("entry");
 document.getElementById("exit").onclick  = () => startScan("exit");
 </script>
