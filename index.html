@@ -23,7 +23,7 @@ body {
   position: relative;
   width: 390px;
   height: 844px;
-  background: #0A3D91;
+  background: #3B82F6; /* 🔵 LIGHTER BLUE */
   overflow: hidden;
 }
 
@@ -136,14 +136,14 @@ date.textContent = now.toLocaleDateString('en-US', { month:'2-digit', day:'2-dig
 let currentMode = null;
 let qr;
 
-/* START CAMERA — FRONT CAMERA */
+/* START CAMERA — SELFIE (FRONT) CAMERA */
 function startScan(mode) {
   currentMode = mode;
   document.getElementById("scanner").style.display = "flex";
 
   qr = new Html5Qrcode("reader");
   qr.start(
-    { facingMode: "user" },   // ✅ FRONT CAMERA
+    { facingMode: "user" },   // 🤳 FRONT / SELFIE CAMERA
     { fps: 10, qrbox: 250 },
     onScanSuccess
   );
