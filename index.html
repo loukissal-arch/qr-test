@@ -1,83 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Camera Overlay Fix</title>
+<title>Entry Exit Camera</title>
 
 <style>
 html, body {
   margin: 0;
   padding: 0;
+  background: black;
   height: 100%;
   overflow: hidden;
-  background: black;
   font-family: -apple-system, BlinkMacSystemFont, system-ui;
 }
 
 /* iPhone 16 Pro canvas */
-#canvas {
+#app {
   position: relative;
   width: 393px;
   height: 852px;
   margin: auto;
   background: black;
-  overflow: hidden;
 }
 
-/* CAMERA VIDEO — MUST BE ON TOP */
-#video {
+/* ---------- START MENU ---------- */
+#menu {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 10; /* 🔑 ABOVE GRAPHICS */
+  background: url("bg.jpeg") center / cover no-repeat;
+  z-index: 1;
 }
 
-/* DARK MASK AROUND WINDOW */
-#cameraHole {
+/* Invisible clickable areas */
+.btn {
   position: absolute;
-  top: 190px;
-  left: 36px;
-  width: 321px;
-  height: 321px;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
-  z-index: 20;
-  pointer-events: none;
+  cursor: pointer;
 }
 
-/* FRAME GRAPHICS (NO SOLID CENTER) */
+/* ENTRY button */
+#entryBtn {
+  top: 356px;
+  left: 43px;
+  width: 305px;
+  height: 115px;
+}
+
+/* EXIT button */
+#exitBtn {
+  top: 487px;
+  left: 43px;
+  width: 306px;
+  height: 118px;
+}
+
+/* ---------- CAMERA SCREEN ---------- */
+#cameraScreen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  z-index: 5;
+}
+
+/* Solid camera UI JPEG (BACKGROUND ONLY) */
 #cameraUI {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 30;
-  pointer-events: none;
+  background: url("camera-ui.jpg") center / cover no-repeat;
+  z-index: 1;
+}
+
+/* CAMERA VIDEO — ON TOP */
+#video {
+  position: absolute;
+  top: 190px;     /* adjust if needed */
+  left: 36px;     /* adjust if needed */
+  width: 321px;   /* adjust if needed */
+  height: 321px;  /* adjust if needed */
+  object-fit: cover;
+  z-index: 10;
+  background: black;
 }
 </style>
 </head>
 
 <body>
 
-<div id="canvas">
+<div id="app">
 
-  <!-- CAMERA VIDEO -->
-  <video id="video" muted autoplay playsinline></video>
+  <!-- START MENU -->
+  <div id="menu">
+    <div id="entryBtn" class="btn"></div>
+    <div id="exitBtn" class="btn"></div>
+  </div>
 
-  <!-- MASK -->
-  <div id="cameraHole"></div>
-
-  <!-- FRAME UI -->
-  <img src="camera-ui.jpg" id="cameraUI">
+  <!-- CAMERA SCREEN -->
+  <div id="cameraScreen">
+    <div id="cameraUI"></div>
+    <video id="video" muted autoplay playsinline></video>
+  </div>
 
 </div>
 
 <script>
-async function startCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user" },
+let stream = null;
+
+/* START CAMERA */
+async function openCamera(mode) {
+  console.log("MODE:", mode);
+
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("cameraScreen").style.display = "block";
+
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "user" }, // selfie camera
     audio: false
   });
 
@@ -86,8 +121,9 @@ async function startCamera() {
   await video.play();
 }
 
-// start on tap (iOS requirement)
-document.body.addEventListener("click", startCamera, { once: true });
+/* BUTTON HANDLERS */
+document.getElementById("entryBtn").onclick = () => openCamera("entry");
+document.getElementById("exitBtn").onclick  = () => openCamera("exit");
 </script>
 
 </body>
