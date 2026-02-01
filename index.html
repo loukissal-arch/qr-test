@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QR Screen – Locked</title>
+<title>QR Screen – Camera</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 body {
@@ -21,7 +23,7 @@ body {
   position: relative;
   width: 390px;
   height: 844px;
-  background: black;
+  background: #0A3D91; /* 🔵 BLUE BEHIND IMAGE */
   overflow: hidden;
 }
 
@@ -35,7 +37,7 @@ body {
   z-index: 0;
 }
 
-/* TIME + DATE WINDOW */
+/* TIME + DATE */
 #datetime {
   position: absolute;
   top: 227px;
@@ -66,7 +68,7 @@ body {
 .hotspot {
   position: absolute;
   cursor: pointer;
-  z-index: 2;
+  z-index: 3;
 }
 
 /* ENTRY */
@@ -84,6 +86,21 @@ body {
   width: 306px;
   height: 118px;
 }
+
+/* CAMERA OVERLAY */
+#scanner {
+  position: absolute;
+  inset: 0;
+  background: black;
+  display: none;
+  z-index: 10;
+  justify-content: center;
+  align-items: center;
+}
+
+#reader {
+  width: 300px;
+}
 </style>
 </head>
 
@@ -99,25 +116,60 @@ body {
     <div id="date"></div>
   </div>
 
-  <!-- ENTRY / EXIT (INVISIBLE) -->
-  <div id="entry" class="hotspot" onclick="alert('ENTRY CLICKED')"></div>
-  <div id="exit" class="hotspot" onclick="alert('EXIT CLICKED')"></div>
+  <!-- ENTRY / EXIT -->
+  <div id="entry" class="hotspot"></div>
+  <div id="exit" class="hotspot"></div>
+
+  <!-- CAMERA -->
+  <div id="scanner">
+    <div id="reader"></div>
+  </div>
 
 </div>
 
 <script>
-/* SET TIME & DATE – 24H + MM/DD/YY */
+/* SET TIME & DATE */
 const now = new Date();
+time.textContent = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+date.textContent = now.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'2-digit' });
 
-document.getElementById("time").textContent =
-  now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+let currentMode = null;
+let qr;
 
-document.getElementById("date").textContent =
-  now.toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: '2-digit'
-  });
+/* START CAMERA */
+function startScan(mode) {
+  currentMode = mode;
+  document.getElementById("scanner").style.display = "flex";
+
+  qr = new Html5Qrcode("reader");
+  qr.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    onScanSuccess
+  );
+}
+
+/* STOP CAMERA */
+function stopScan() {
+  if (qr) {
+    qr.stop().then(() => {
+      qr.clear();
+      document.getElementById("scanner").style.display = "none";
+    });
+  }
+}
+
+/* QR SUCCESS */
+function onScanSuccess(text) {
+  stopScan();
+  console.log("QR DATA:", text);
+  console.log("MODE:", currentMode);
+  alert(currentMode === "entry" ? "ENTRY SUCCESS" : "EXIT SUCCESS");
+}
+
+/* CLICK HANDLERS */
+document.getElementById("entry").onclick = () => startScan("entry");
+document.getElementById("exit").onclick  = () => startScan("exit");
 </script>
 
 </body>
