@@ -18,16 +18,16 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, system-ui;
 }
 
-/* PHONE CANVAS */
+/* iPhone 16 Pro canvas */
 #canvas {
   position: relative;
-  width: 390px;
-  height: 844px;
+  width: 393px;
+  height: 852px;
   background: #3B82F6;
   overflow: hidden;
 }
 
-/* MAIN IMAGE */
+/* MAIN MENU IMAGE */
 #bg {
   position: absolute;
   inset: 0;
@@ -45,7 +45,7 @@ body {
   background: black;
 }
 
-/* CAMERA VIDEO */
+/* CAMERA FEED */
 #reader {
   position: absolute;
   inset: 0;
@@ -57,43 +57,47 @@ body {
   object-fit: cover;
 }
 
-/* HIDE QR UI */
+/* REMOVE DEFAULT QR UI */
 .qr-shaded-region,
 #reader canvas {
   display: none !important;
 }
 
-/* GRAPHIC OVERLAY IMAGE */
-#cameraFrame {
+/* CAMERA MASK (WINDOW) */
+#cameraMask {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+/* Darken everything except window */
+#cameraMask::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+}
+
+/* Clear camera window (slightly larger than black square) */
+#cameraMask::after {
+  content: "";
+  position: absolute;
+  top: 190px;
+  left: 36px;
+  width: 321px;
+  height: 321px;
+  background: transparent;
+}
+
+/* CAMERA UI IMAGE */
+#cameraUI {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   z-index: 20;
   pointer-events: none;
-}
-
-/* MASK — THIS IS THE CAMERA WINDOW */
-#cameraMask {
-  position: absolute;
-  inset: 0;
-  z-index: 15;
-  pointer-events: none;
-  background: rgba(0,0,0,0);
-  box-shadow:
-    0 0 0 9999px rgba(0,0,0,0.85);
-}
-
-/* CAMERA WINDOW POSITION (ADJUST IF NEEDED) */
-#cameraMask::after {
-  content: "";
-  position: absolute;
-  top: 230px;
-  left: 45px;
-  width: 300px;
-  height: 300px;
-  background: transparent;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0);
 }
 </style>
 </head>
@@ -102,17 +106,14 @@ body {
 
 <div id="canvas">
 
+  <!-- FIRST MENU -->
   <img id="bg" src="bg.jpg">
 
-  <!-- CAMERA -->
+  <!-- CAMERA MENU -->
   <div id="scanner">
     <div id="reader"></div>
-
-    <!-- MASK CREATES CAMERA WINDOW -->
     <div id="cameraMask"></div>
-
-    <!-- YOUR GRAPHIC FRAME (NO CUTOUT NEEDED) -->
-    <img src="camera-frame.jpg" id="cameraFrame">
+    <img src="camera-ui.jpg" id="cameraUI">
   </div>
 
 </div>
@@ -120,12 +121,13 @@ body {
 <script>
 let qr;
 
+/* START CAMERA */
 function startScan() {
   document.getElementById("scanner").style.display = "block";
 
   qr = new Html5Qrcode("reader");
   qr.start(
-    { facingMode: "user" },
+    { facingMode: "user" }, // selfie camera
     { fps: 10 },
     () => {
       stopScan();
@@ -134,6 +136,7 @@ function startScan() {
   );
 }
 
+/* STOP CAMERA */
 function stopScan() {
   if (qr) {
     qr.stop().then(() => {
@@ -143,6 +146,7 @@ function stopScan() {
   }
 }
 
+/* TEMP: tap anywhere to test camera */
 document.body.onclick = startScan;
 </script>
 
