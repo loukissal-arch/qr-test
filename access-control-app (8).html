@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Easy Access Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* MAIN SCREEN */
+        .main-screen {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .background-container {
+            position: relative;
+            height: 100vh;
+            aspect-ratio: 750 / 1624;
+            max-width: 100vw;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* TIME OVERLAY */
+        .time-overlay {
+            position: absolute;
+            top: 22%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            padding: 25px 60px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .current-time {
+            font-size: 58px;
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .current-date {
+            background: #e8e8e8;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        /* INVISIBLE BUTTONS */
+        .overlay-btn {
+            position: absolute;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .overlay-btn:active,
+        .overlay-btn:hover,
+        .overlay-btn:focus {
+            background: transparent;
+            outline: none;
+        }
+
+        .entrance-overlay {
+            top: 40%;
+            left: 12.5%;
+            width: 75%;
+            height: 10.5%;
+            border-radius: 20px;
+        }
+
+        .exit-overlay {
+            top: 52%;
+            left: 12.5%;
+            width: 75%;
+            height: 10.5%;
+            border-radius: 20px;
+        }
+
+        /* ============================================ */
+        /* CAMERA SCAN SCREEN */
+        /* ============================================ */
+        .camera-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            z-index: 100;
+        }
+
+        .camera-screen.active {
+            display: block;
+        }
+
+        /* Video fills the screen behind everything */
+        .camera-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* The overlay image with transparent cutout sits on top */
+        .camera-overlay-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .camera-overlay-img {
+            height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        /* Close button overlay */
+        .camera-close-btn {
+            position: absolute;
+            top: 12%;
+            right: 15%;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            font-size: 32px;
+            color: #333;
+            cursor: pointer;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        /* ============================================ */
+        /* SUCCESS MODAL */
+        /* ============================================ */
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .success-modal.active {
+            display: flex;
+        }
+
+        .success-content {
+            background: #fff;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 350px;
+            overflow: hidden;
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Gray top section with checkmark */
+        .success-top {
+            background: #6b7280;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-checkmark svg {
+            width: 45px;
+            height: 45px;
+            stroke: white;
+            stroke-width: 3;
+            fill: none;
+        }
+
+        /* Pink/white bottom section */
+        .success-bottom {
+            background: #fdf2f8;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .success-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 25px;
+        }
+
+        .success-ok-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 50px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .success-ok-btn:active {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <!-- MAIN SCREEN -->
+    <div class="main-screen" id="main-screen">
+        <div class="background-container">
+            <img class="background-image" src="background.png" alt="Background">
+            
+            <!-- Time overlay -->
+            <div class="time-overlay" id="time-box">
+                <div class="current-time" id="current-time">08:10</div>
+                <div class="current-date" id="current-date">04/02/2026</div>
+            </div>
+            
+            <!-- Invisible clickable overlays -->
+            <button class="overlay-btn entrance-overlay" onclick="openCamera('entrance')"></button>
+            <button class="overlay-btn exit-overlay" onclick="openCamera('exit')"></button>
+        </div>
+    </div>
+
+    <!-- CAMERA SCAN SCREEN -->
+    <div class="camera-screen" id="camera-screen">
+        <!-- Camera video (behind overlay) -->
+        <video class="camera-video" id="video" autoplay playsinline></video>
+        
+        <!-- Overlay image with transparent cutout -->
+        <div class="camera-overlay-container">
+            <img class="camera-overlay-img" id="camera-overlay-img" src="camera-background-entrance.png" alt="Camera Overlay">
+        </div>
+        
+        <!-- Close button -->
+        <button class="camera-close-btn" onclick="closeCamera()">×</button>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="success-modal" id="success-modal">
+        <div class="success-content">
+            <div class="success-top">
+                <div class="success-checkmark">
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <div class="success-bottom">
+                <div class="success-text" id="success-text">Επιτυχής είσοδος</div>
+                <button class="success-ok-btn" onclick="closeSuccess()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Scanner Library -->
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+
+    <script>
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const mo = String(now.getMonth() + 1).padStart(2, '0');
+            const y = now.getFullYear();
+            document.getElementById('current-time').textContent = `${h}:${m}`;
+            document.getElementById('current-date').textContent = `${d}/${mo}/${y}`;
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Camera and scanning
+        let currentAction = '';
+        let codeReader = null;
+        let stream = null;
+
+        async function openCamera(action) {
+            currentAction = action;
+            
+            // Use the same overlay for both (or create separate ones for entrance/exit)
+            // For now using the entrance overlay
+            document.getElementById('camera-overlay-img').src = 'camera-background-entrance.png';
+            
+            document.getElementById('camera-screen').classList.add('active');
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+
+                // Start QR scanning
+                codeReader = new ZXing.BrowserQRCodeReader();
+                codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+                    if (result) {
+                        showSuccess();
+                    }
+                });
+            } catch (err) {
+                console.log('Camera error:', err);
+                alert('Camera access denied. Please allow camera access.');
+                closeCamera();
+            }
+        }
+
+        function closeCamera() {
+            document.getElementById('camera-screen').classList.remove('active');
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            if (codeReader) {
+                codeReader.reset();
+            }
+        }
+
+        function showSuccess() {
+            closeCamera();
+            
+            // Update success text based on action
+            const successText = document.getElementById('success-text');
+            if (currentAction === 'entrance') {
+                successText.textContent = 'Επιτυχής είσοδος';
+            } else {
+                successText.textContent = 'Επιτυχής έξοδος';
+            }
+            
+            document.getElementById('success-modal').classList.add('active');
+        }
+
+        function closeSuccess() {
+            document.getElementById('success-modal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
